@@ -15,6 +15,7 @@ class MateExample < Jface::ApplicationWindow
     @mate_text.set_grammar_by_name "Ruby"
     @mate_text.set_theme_by_name "Twilight"
     @mate_text.set_font "Monaco", 15
+    # @mate_text.document.set(File.read("lib/example.rb"))
     return @contents
   end
   

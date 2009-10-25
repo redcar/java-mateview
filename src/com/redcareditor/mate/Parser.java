@@ -32,7 +32,16 @@ public class Parser {
 	public Scope root;
 	
 	// temporary stores for the modifications to the mateText
-	private int modifyStart, modifyEnd;
+	private int modifyStartOffset; 
+	private int modifyEndOffset;
+	private int modifyStartLineOffset; 
+	private int modifyEndLineOffset;
+	private int modifyStartLine; 
+	private int modifyEndLine;
+	private int modifyNumLines;
+	private int modifyOldNumLines;
+	private int modifyPrevLines;
+	private String[] modifyLines;
 	private String modifyText;
 	
 	public Parser(Grammar g, MateText m) {
@@ -82,23 +91,41 @@ public class Parser {
 	}
 
 	public void verifyEventCallback(int start, int end, String text) {
-		modifyStart = start;
-		modifyEnd   = end;
-		modifyText  = text;
+		System.out.printf("verifyEventCallback(start:%d, end:%d)\n", start, end);
+		modifyStartOffset = start;
+		modifyEndOffset   = end;
+		modifyText        = text;
+		modifyStartLine   = styledText.getLineAtOffset(start);
+		modifyEndLine     = styledText.getLineAtOffset(end);
+		modifyStartLineOffset   = modifyStartOffset - styledText.getOffsetAtLine(modifyStartLine);
+		modifyEndLineOffset     = modifyEndOffset   - styledText.getOffsetAtLine(modifyEndLine);
+		modifyLines = modifyText.split("\n");
+		modifyNumLines    = modifyLines.length - 1;
+		String oldText;
+		if (start - end > 0)
+			oldText = styledText.getText(start, end);
+		else
+			oldText = "";
+		modifyOldNumLines = oldText.split("\n").length;
+		System.out.printf(" modifyStartLine: %d\n modifyEndLine: %d\n modifyStartOffset: %d\n modifyEndOffset: %d\n modifyNumLines: %d\n modifyOldNumLines: %d\n",
+						modifyStartLine, modifyEndLine, modifyStartOffset, modifyEndOffset, modifyNumLines, modifyOldNumLines);
+		System.out.printf(" modifyStartLineOffset: %d\n", modifyStartLineOffset);
+		System.out.printf(" modifyEndLineOffset: %d\n", modifyEndLineOffset);
+		parseRange(modifyStartLine, modifyStartLine + modifyNumLines);
 	}
 	
 	public void modifyEventCallback() {
 		// TODO: this isn't quite right...
-		changes.add(styledText.getLineAtOffset(modifyStart), 
-				styledText.getLineAtOffset(modifyStart + modifyText.length()));
+		// changes.add(styledText.getLineAtOffset(modifyStart), 
+		// 		styledText.getLineAtOffset(modifyStart + modifyText.length()));
 //		System.out.printf("modifying %d - %d, %d, %s\n", modifyStart, modifyEnd, styledText.getLineAtOffset(modifyStart), modifyText);
-		processChanges();
+		// processChanges();
 	}
 
 	// Process all change ranges.
 	public void processChanges() {
 		int thisParsedUpto = -1;
-//		System.out.printf("process_changes (lastVisibleLine: %d) (charCount = %d)\n", lastVisibleLine, styledText.getCharCount());
+		System.out.printf("process_changes (lastVisibleLine: %d) (charCount = %d)\n", lastVisibleLine, styledText.getCharCount());
 		for (Range range : changes) {
 			if (range.end > thisParsedUpto && range.start <= lastVisibleLine + lookAhead) {
 				int rangeEnd = Math.min(lastVisibleLine + lookAhead, range.end);
@@ -113,7 +140,7 @@ public class Parser {
 	// more if necessary. Returns the index of the last line
 	// parsed.
 	private int parseRange(int fromLine, int toLine) {
-//		System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
+		System.out.printf("parse_range(%d, %d)\n", fromLine, toLine);
 		int lineIx = fromLine;
 		boolean scopeChanged = false;
 		boolean scopeEverChanged = false;
@@ -167,10 +194,47 @@ public class Parser {
 		return endScope;
 	}
 	
+	// Returns the line at the given line index. Uses the modify* private members
+	// to determine what the document would look like after the modifications, and 
+	// returns that instead of what's currently in the buffer.
+	private String getLine(int lineIx) {
+		if (lineIx < modifyStartLine)
+			return styledText.getLine(lineIx) + "\n";
+		else if (lineIx >= modifyStartLine + modifyNumLines + 1)
+			return styledText.getLine(lineIx + modifyOldNumLines - modifyNumLines) + "\n";
+		else
+			return specialGetLine(lineIx);
+	}
+	
+	private String specialGetLine(int lineIx) {
+		int lineIndexWithinChange = lineIx - modifyStartLine;
+		if (lineIndexWithinChange > 0 && lineIndexWithinChange < modifyNumLines)
+			return modifyText.split("\n")[lineIndexWithinChange] + "\n";
+		else if (lineIndexWithinChange == 0 && modifyNumLines == 0) {
+			String oldLine = styledText.getLine(lineIx + modifyOldNumLines - modifyNumLines - 1);
+			System.out.printf("    oldLine: '%s'\n", oldLine);
+			String remainingStartChunk = oldLine.substring(0, modifyStartLineOffset);
+			String remainingEndChunk = oldLine.substring(modifyEndLineOffset, oldLine.length());
+			return remainingStartChunk + modifyLines[modifyLines.length - 1] + remainingEndChunk + "\n";
+		}
+		else if (lineIndexWithinChange == 0)
+			return styledText.getLine(lineIx).substring(0, modifyStartLineOffset) + modifyLines[0] + "\n";
+		else if (lineIndexWithinChange == modifyNumLines) {
+			String oldLine = styledText.getLine(lineIx + modifyOldNumLines - modifyNumLines);
+			String remainingChunk = oldLine.substring(modifyEndLineOffset, oldLine.length());
+			return modifyLines[modifyLines.length - 1] + remainingChunk + "\n";
+		}
+		else {
+			System.out.printf("specialGetLine: shouldn't be here");
+			return "";
+		}
+	}
+	
 	private boolean parseLine(int lineIx) {
-		String line = styledText.getLine(lineIx) + "\n";
+		String line = getLine(lineIx);
+		System.out.printf("getLine(%d): \"%s\"", lineIx, line);
 		int length = line.length();
-//		System.out.printf("p%d, ", lineIx);
+		System.out.printf("p%d, ", lineIx);
 		if (lineIx > this.parsedUpto)
 			this.parsedUpto = lineIx;
 		Scope startScope = scopeBeforeStartOfLine(lineIx);

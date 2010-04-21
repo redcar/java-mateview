@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import com.redcareditor.mate.document.MateDocument;
 import com.redcareditor.mate.document.MateTextLocation;
+import com.redcareditor.mate.document.swt.SwtMateTextLocation;
 import com.redcareditor.mate.document.MateTextRange;
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
@@ -65,17 +66,46 @@ public class Scope implements Comparable<Scope>{
 			child.setMateText(mateText);
 	}
 	
+	static public Scope findContainingScope(ArrayList<Scope> scopes, int offset) {
+	    int high = scopes.size(), low = -1, probe;
+	    if (high == 0)
+	    	return null;
+	    Scope scope = scopes.get(high - 1);
+	    int probeStart = ((SwtMateTextLocation) scope.getStart()).offset;
+	    while (high - low > 1)
+	    {
+	        probe = (low + high) >>> 1;
+	        scope = scopes.get(probe);
+	        probeStart = ((SwtMateTextLocation) scope.getStart()).offset;
+	        if (probeStart < offset)
+	            low = probe;
+	        else
+	            high = probe;
+	    }
+	    if (probeStart < offset) {
+	    	int probeEnd = ((SwtMateTextLocation) scope.getEnd()).offset;
+	    	if (probeEnd > offset) {
+	    		return scope;
+	    	}
+	    	else {	
+	    		return null;
+	    	}
+	    }
+	    else {
+	    	return null;
+	    }
+	}
+
 	public Scope scopeAt(int line, int lineOffset) {
 		MateTextLocation location = document.getTextLocation(line, lineOffset);
 		
 		if (getStart().compareTo(location) <= 0 || parent == null) {
 			if (isOpen || getEnd().compareTo(location) >= 0) {
-				for (Scope child : children) {
-					if (child.contains(location)) {
-						return child.scopeAt(line, lineOffset);
-					}
-				}
-				return this;
+				Scope containingChild = Scope.findContainingScope(children, ((SwtMateTextLocation) location).offset);
+				if (containingChild != null)
+					return containingChild.scopeAt(line, lineOffset);
+				else
+					return this;
 			}
 			
 		}

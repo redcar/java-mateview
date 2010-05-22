@@ -119,91 +119,92 @@ public class MateText {
 	}
 	
 	private void createSourceViewer(Composite parent) {
-        fAnnotationAccess = new AnnotationMarkerAccess();
-
+		fAnnotationAccess = new AnnotationMarkerAccess();
+		
 		cc = new ColorCache();
-
+		
 		compositeRuler = new CompositeRuler();
 		annotationRuler = new AnnotationRulerColumn(fAnnotationModel, 16, fAnnotationAccess);
 		compositeRuler.setModel(fAnnotationModel);
-        
+		
 		// add what types are show on the different rulers
-        
+		
 		lineNumbers = new LineNumberRulerColumn();
 		compositeRuler.addDecorator(0, lineNumbers);
 		compositeRuler.addDecorator(0, annotationRuler);
-
+		
 		viewer = new ProjectionViewer(parent, compositeRuler, null, false, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
-        ProjectionViewer projectionViewer = (ProjectionViewer) viewer;
-        
-        document = new Document();
-        ProjectionDocumentManager manager = new ProjectionDocumentManager();
-        ProjectionDocument projectionDocument = (ProjectionDocument) manager.createSlaveDocument(document);
-        viewer.setDocument(document, fAnnotationModel);
-        
-        projectionSupport = new ProjectionSupport(projectionViewer, fAnnotationAccess, (ISharedTextColors) cc);
-        projectionSupport.install();
-        viewer.doOperation(ProjectionViewer.TOGGLE);
-        projectionAnnotationModel = projectionViewer.getProjectionAnnotationModel();
-        
+		ProjectionViewer projectionViewer = (ProjectionViewer) viewer;
+		
+		document = new Document();
+		ProjectionDocumentManager manager = new ProjectionDocumentManager();
+		ProjectionDocument projectionDocument = (ProjectionDocument) manager.createSlaveDocument(document);
+		viewer.setDocument(document, fAnnotationModel);
+		
+		projectionSupport = new ProjectionSupport(projectionViewer, fAnnotationAccess, (ISharedTextColors) cc);
+		projectionSupport.install();
+		viewer.doOperation(ProjectionViewer.TOGGLE);
+		projectionViewer.enableProjection();
+		projectionAnnotationModel = projectionViewer.getProjectionAnnotationModel();
+		
 		// hover manager that shows text when we hover
 		AnnotationHover ah = new AnnotationHover();
 		AnnotationConfiguration ac = new AnnotationConfiguration();
 		AnnotationBarHoverManager fAnnotationHoverManager = new AnnotationBarHoverManager(compositeRuler, viewer, ah, ac);
 		fAnnotationHoverManager.install(annotationRuler.getControl());
-        
+		
 		// to paint the annotations
 		annotationPainter = new AnnotationPainter(viewer, fAnnotationAccess);
-        
+		
 		// this will draw the squigglies under the text
 		viewer.addPainter(annotationPainter);
-        
-        createAnnotationMouseListener();
-    }
-    
-    private void createAnnotationMouseListener() {
+		
+		createAnnotationMouseListener();
+	}
+	
+	private void createAnnotationMouseListener() {
 		annotationMouseListener = new MouseListener() {
 			public void mouseUp(MouseEvent event) {
 				int lineNumber = annotationRuler.toDocumentLineNumber(event.y);
-                for (IAnnotationAreaListener l : annotationListeners) {
-                    l.mouseClick(lineNumber);
-                }
-            }
+				for (IAnnotationAreaListener l : annotationListeners) {
+					l.mouseClick(lineNumber);
+				}
+			}
 
 			public void mouseDown(MouseEvent event) {
 				int lineNumber = annotationRuler.toDocumentLineNumber(event.y);
-                System.out.printf("mouseDown line: %d\n", lineNumber);
-            }
+				 System.out.printf("mouseDown line: %d\n", lineNumber);
+			}
 
 			public void mouseDoubleClick(MouseEvent event) {
 				int lineNumber = annotationRuler.toDocumentLineNumber(event.y);
-                System.out.printf("doubleClick line: %d\n", lineNumber);
-                for (IAnnotationAreaListener l : annotationListeners) {
-                    l.mouseDoubleClick(lineNumber);
-                }
-            }
+				System.out.printf("doubleClick line: %d\n", lineNumber);
+				for (IAnnotationAreaListener l : annotationListeners) {
+					l.mouseDoubleClick(lineNumber);
+				}
+			}
 		};
 		annotationRuler.getControl().addMouseListener(annotationMouseListener);
-
-    }
-    
-    public void addAnnotationType(String type, String imagePath, RGB rgb) {
-        if (singleLine) return;
-        
-        annotationRuler.addAnnotationType(type);
-        annotationPainter.addAnnotationType(type);
-		annotationPainter.setAnnotationTypeColor(type, new Color(Display.getDefault(), rgb));
-        MateText.annotationImages.put(type, new Image(Display.getDefault(), imagePath));
-    }
-    
-    public MateAnnotation addAnnotation(String type, int line, String text, int start, int length) {
-        if (singleLine) return null;
-        
-        MateAnnotation mateAnnotation = new MateAnnotation(type, line, text);
+	
+	}
+	
+	public void addAnnotationType(String type, String imagePath, RGB rgb) {
+		 if (singleLine) return;
+		 
+		 annotationRuler.addAnnotationType(type);
+		 annotationPainter.addAnnotationType(type);
+		
+		 MateText.annotationImages.put(type, new Image(Display.getDefault(), imagePath));
+	}
+	
+	public MateAnnotation addAnnotation(String type, int line, String text, int start, int length) {
+		if (singleLine) return null;
+		
+		MateAnnotation mateAnnotation = new MateAnnotation(type, line, text);
 		fAnnotationModel.addAnnotation(mateAnnotation, new Position(start, length));
-        return mateAnnotation;
-    }
-    
+		return mateAnnotation;
+	}
+	
     public ArrayList<MateAnnotation> annotations() {
         ArrayList<MateAnnotation> result = new ArrayList<MateAnnotation>();
         
@@ -281,16 +282,38 @@ public class MateText {
         return false;        
     }
 
-    private void redrawRuler(boolean showLineNumbers, boolean showAnnotations) {
-        compositeRuler.removeDecorator(lineNumbers);
-        compositeRuler.removeDecorator(annotationRuler);
-        if (showLineNumbers)
-            compositeRuler.addDecorator(0, (IVerticalRulerColumn) lineNumbers);
-        if (showAnnotations)
-            compositeRuler.addDecorator(0, (IVerticalRulerColumn) annotationRuler);
-        compositeRuler.relayout();
-    }
-    
+	private void redrawRuler(boolean showLineNumbers, boolean showAnnotations) {
+		compositeRuler.removeDecorator(lineNumbers);
+		compositeRuler.removeDecorator(annotationRuler);
+		if (showLineNumbers)
+			compositeRuler.addDecorator(0, (IVerticalRulerColumn) lineNumbers);
+		if (showAnnotations)
+			compositeRuler.addDecorator(0, (IVerticalRulerColumn) annotationRuler);
+		compositeRuler.relayout();
+	}
+	
+	private Annotation[] oldAnnotations;
+	
+	public void foldLines(int startLine, int endLine) {
+		int startOffset = getTextWidget().getOffsetAtLine(startLine);
+		int endOffset   = getTextWidget().getOffsetAtLine(endLine);
+		System.out.printf("Fold offsets: %d %d\n", startOffset, endOffset);
+
+		HashMap newAnnotations = new HashMap();
+
+		Position pos = new Position(startOffset, endOffset - startOffset);
+		ProjectionAnnotation annotation = new ProjectionAnnotation();
+
+		newAnnotations.put(annotation, pos);
+		projectionAnnotationModel.modifyAnnotations(oldAnnotations, newAnnotations, null);
+
+		Annotation[] annotations = new Annotation[1];
+		annotations[0] = annotation;
+		oldAnnotations = annotations;
+		
+		projectionAnnotationModel.collapse(annotation);
+	}
+	
 	public boolean isSingleLine() {
 		return singleLine;
 	}
@@ -510,7 +533,8 @@ public class MateText {
         }
 
 		public void paint(Annotation annotation, GC gc, Canvas canvas, Rectangle bounds) {
-			ImageUtilities.drawImage(((MateAnnotation)annotation).getImage(), gc, canvas, bounds, SWT.CENTER, SWT.TOP);
+			if (annotation instanceof MateAnnotation)
+				ImageUtilities.drawImage(((MateAnnotation)annotation).getImage(), gc, canvas, bounds, SWT.CENTER, SWT.TOP);
 		}
 
 		public boolean isPaintable(Annotation annotation) {

@@ -111,9 +111,22 @@ class MateExample < Jface::ApplicationWindow
     add_annotations.text = "Add Annotations"
     file_menu.add add_annotations
 
+    fold_lines = FoldLines.new
+    fold_lines.window = self
+    fold_lines.text = "Fold Lines 5 - 10"
+    file_menu.add fold_lines
+
     return main_menu
   end
   
+  class FoldLines < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.foldLines(5, 10)
+    end
+  end
+
   class AddAnnotations < Jface::Action
     attr_accessor :window
     

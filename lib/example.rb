@@ -243,7 +243,7 @@ class MateExample < Jface::ApplicationWindow
     def run
       s = Time.now
       ##until Time.now - s > 120
-      @window.mate_text.getMateDocument.set(File.read(File.dirname(__FILE__) + "/test_big_ruby_file.rb")*3)
+      doc = @window.mate_text.getMateDocument.set(File.read(File.dirname(__FILE__) + "/test_big_ruby_file.rb")*3)
       #@window.mate_text.getMateDocument.set("def foo")
       #end
       puts "parse took #{Time.now - s}s"

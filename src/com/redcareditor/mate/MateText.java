@@ -10,7 +10,9 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
 import org.eclipse.jface.text.*;
+import org.eclipse.jface.text.projection.*;
 import org.eclipse.jface.text.source.*;
+import org.eclipse.jface.text.source.projection.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.*;
@@ -56,7 +58,6 @@ public class MateText {
 		return _consoleHandler;
 	}
 
-	/* components plugged together */
 	public SourceViewer viewer;
 	private IDocument document;
 	private CompositeRuler compositeRuler;
@@ -73,11 +74,14 @@ public class MateText {
     
     private static HashMap<String, Image> annotationImages = new HashMap<String, Image>();
     
-    // annotation model
     private AnnotationModel fAnnotationModel = new AnnotationModel();
     private IAnnotationAccess fAnnotationAccess;
     private AnnotationPainter annotationPainter;
     private MouseListener annotationMouseListener;
+    
+    private ProjectionAnnotationModel projectionAnnotationModel;
+    private ProjectionSupport projectionSupport;
+    
     private ColorCache cc;
     
 	public MateText(Composite parent) {
@@ -86,8 +90,7 @@ public class MateText {
 
 	public MateText(Composite parent, boolean thisSingleLine) {
 		singleLine = thisSingleLine;
-		document = new Document();
-		if (singleLine)
+        if (singleLine)
 			createSingleLineSourceViewer(parent);
 		else
 			createSourceViewer(parent);
@@ -111,6 +114,7 @@ public class MateText {
 	
 	private void createSingleLineSourceViewer(Composite parent) {
 		viewer = new SourceViewer(parent, null, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL | SWT.SINGLE);
+		document = new Document();
 		viewer.setDocument(document);
 	}
 	
@@ -129,8 +133,18 @@ public class MateText {
 		compositeRuler.addDecorator(0, lineNumbers);
 		compositeRuler.addDecorator(0, annotationRuler);
 
-		viewer = new SourceViewer(parent, compositeRuler, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
-		viewer.setDocument(document, fAnnotationModel);
+		viewer = new ProjectionViewer(parent, compositeRuler, null, false, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
+        ProjectionViewer projectionViewer = (ProjectionViewer) viewer;
+        
+        document = new Document();
+        ProjectionDocumentManager manager = new ProjectionDocumentManager();
+        ProjectionDocument projectionDocument = (ProjectionDocument) manager.createSlaveDocument(document);
+        viewer.setDocument(document, fAnnotationModel);
+        
+        projectionSupport = new ProjectionSupport(projectionViewer, fAnnotationAccess, (ISharedTextColors) cc);
+        projectionSupport.install();
+        viewer.doOperation(ProjectionViewer.TOGGLE);
+        projectionAnnotationModel = projectionViewer.getProjectionAnnotationModel();
         
 		// hover manager that shows text when we hover
 		AnnotationHover ah = new AnnotationHover();

@@ -37,9 +37,12 @@ public class SwtMateDocument implements MateDocument, MateTextFactory {
 	}
 
 	public void set(String text) {
-		this.mateText.getDocument().set(text);
-		//reparseAll();
-	}
+        IDocument doc = this.mateText.getDocument();
+		try {
+            doc.replace(0, doc.getLength(), text);
+        } catch (BadLocationException e) {
+        }
+    }
 	
 	public IDocument getJFaceDocument() {
 		return this.mateText.getDocument();

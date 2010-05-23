@@ -132,8 +132,10 @@ public class MateText {
 		lineNumbers = new LineNumberRulerColumn();
 		compositeRuler.addDecorator(0, lineNumbers);
 		compositeRuler.addDecorator(0, annotationRuler);
-		
-		viewer = new ProjectionViewer(parent, compositeRuler, null, false, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
+        
+		OverviewRuler overviewRuler = new OverviewRuler(fAnnotationAccess, 10, cc);
+
+		viewer = new ProjectionViewer(parent, compositeRuler, overviewRuler, false, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		ProjectionViewer projectionViewer = (ProjectionViewer) viewer;
 		
 		document = new Document();
@@ -259,14 +261,17 @@ public class MateText {
     }
 
     public void setLineNumbersVisible(boolean val) {
+        if (isSingleLine()) return;
         redrawRuler(val, getAnnotationsVisible());
     }
     
     public void setAnnotationsVisible(boolean val) {
+        if (isSingleLine()) return;
         redrawRuler(getLineNumbersVisible(), val);
     }
 
     public boolean getLineNumbersVisible() {
+        if (isSingleLine()) return false;
         Iterator iterator = compositeRuler.getDecoratorIterator();
         while (iterator.hasNext())
             if (((IVerticalRulerColumn) iterator.next()) == lineNumbers) 
@@ -275,6 +280,7 @@ public class MateText {
     }
     
     public boolean getAnnotationsVisible() {
+        if (isSingleLine()) return false;
         Iterator iterator = compositeRuler.getDecoratorIterator();
         while (iterator.hasNext())
             if (((IVerticalRulerColumn) iterator.next()) == annotationRuler) 

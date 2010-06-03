@@ -218,8 +218,20 @@ public class SwtColourer implements Colourer {
 			return "#FFFFFF";
 		}
 	}
+    
+    private boolean themeHasMarginColours() {
+        return true;
+    }
+    
+    private Color globalMarginForeground() {
+        return ColourUtil.getColour("#AAAAAA");
+    }
 
-	private boolean isColorDefined(String colour) {
+    private Color globalMarginBackground() {
+        return ColourUtil.getColour("#222222");
+    }
+
+    private boolean isColorDefined(String colour) {
 		return colour != null && !(colour.length() == 0);
 	}
 
@@ -280,6 +292,8 @@ public class SwtColourer implements Colourer {
 				addStyleRangeForScope(styleRanges, scope, true, event);
 			// printStyleRanges(styleRanges);
 		}
+        addMarginColumnStyleRange(styleRanges, event);
+    
 		event.styles = (StyleRange[]) styleRanges.toArray(new StyleRange[0]);
 	}
 
@@ -320,6 +334,29 @@ public class SwtColourer implements Colourer {
 			//System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
 		}
 	}
+    
+    private void addMarginColumnStyleRange(ArrayList<StyleRange> styleRanges, LineStyleEvent event) {
+        int marginColumn = mateText.getMarginColumn();
+        
+        if (marginColumn == -1 || !themeHasMarginColours())
+            return;
+        
+        int startLineOffset = event.lineOffset;
+		int endLineOffset   = startLineOffset + event.lineText.length();
+        
+        if (endLineOffset <= startLineOffset + marginColumn)
+            return;
+        
+		StyleRange styleRange = new StyleRange();
+        
+        styleRange.start = startLineOffset + mateText.getMarginColumn();
+        styleRange.length = endLineOffset - styleRange.start;
+        
+        styleRange.background = globalMarginBackground();
+        styleRange.foreground = globalMarginForeground();
+        
+        addStyleRangeWithoutOverlaps(styleRanges, styleRange);
+    }
 
 	private void addStyleRangeWithoutOverlaps(ArrayList<StyleRange> styleRanges, StyleRange styleRange) {
 		if (styleRanges.size() == 0) {

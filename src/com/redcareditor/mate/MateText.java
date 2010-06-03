@@ -80,6 +80,8 @@ public class MateText {
     private MouseListener annotationMouseListener;
     private ColorCache cc;
     
+    private int marginColumn = -1;
+    
 	public MateText(Composite parent) {
 		this(parent, false);
 	}
@@ -173,6 +175,14 @@ public class MateText {
 
     }
     
+    public int getMarginColumn() {
+        return marginColumn;
+    }
+    
+    public void setMarginColumn(int val) {
+        this.marginColumn = val;
+    }
+
     public void addAnnotationType(String type, String imagePath, RGB rgb) {
         if (singleLine) return;
         

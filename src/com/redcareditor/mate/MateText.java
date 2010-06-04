@@ -181,6 +181,7 @@ public class MateText {
     
     public void setMarginColumn(int val) {
         this.marginColumn = val;
+        redraw();
     }
 
     public void addAnnotationType(String type, String imagePath, RGB rgb) {

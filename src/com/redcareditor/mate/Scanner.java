@@ -61,6 +61,8 @@ public class Scanner implements Iterable<Marker> {
 	
 	
 	public Marker findNextMarker() {
+		if (position >= this.lineLength)
+			return null;
 		//logger.info(String.format("scanning: '%s' from %d to %d (current_scope is %s)", this.line.replaceAll("\n", ""), this.position, this.lineLength, currentScope.name));
 		if (position > MAX_LINE_LENGTH)
 			return null;

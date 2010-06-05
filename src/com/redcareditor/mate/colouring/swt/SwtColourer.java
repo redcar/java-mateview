@@ -293,8 +293,9 @@ public class SwtColourer implements Colourer {
 				addStyleRangeForScope(styleRanges, scope, true, event);
 			// printStyleRanges(styleRanges);
 		}
-        addMarginColumnStyleRange(styleRanges, event);
-    
+		int tabWidth = mateText.getControl().getTabs();
+		addMarginColumnStyleRange(styleRanges, event, tabWidth);
+		
 		event.styles = (StyleRange[]) styleRanges.toArray(new StyleRange[0]);
 	}
 
@@ -335,29 +336,31 @@ public class SwtColourer implements Colourer {
 			//System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
 		}
 	}
-    
-    private void addMarginColumnStyleRange(ArrayList<StyleRange> styleRanges, LineStyleEvent event) {
-        int marginColumn = mateText.getMarginColumn();
-        
-        if (marginColumn == -1 || !themeHasMarginColours())
-            return;
-        
-        int startLineOffset = event.lineOffset;
+	
+	private void addMarginColumnStyleRange(ArrayList<StyleRange> styleRanges, LineStyleEvent event, int tabWidth) {
+		int marginColumn = mateText.getMarginColumn();
+		
+		if (marginColumn == -1 || !themeHasMarginColours())
+			return;
+		
+		int startLineOffset = event.lineOffset;
 		int endLineOffset   = startLineOffset + event.lineText.length();
-        
-        if (endLineOffset <= startLineOffset + marginColumn)
-            return;
-        
+		int maxColumn       = MateText.columnOfLineOffset(event.lineText, endLineOffset - startLineOffset, tabWidth);
+		
+		if (maxColumn <= marginColumn)
+			return;
+		
 		StyleRange styleRange = new StyleRange();
-        
-        styleRange.start = startLineOffset + mateText.getMarginColumn();
-        styleRange.length = endLineOffset - styleRange.start;
-        
-        styleRange.background = globalMarginBackground();
-        styleRange.foreground = globalMarginForeground();
-        
-        addStyleRangeWithoutOverlaps(styleRanges, styleRange);
-    }
+		
+		int offsetOfColumn = MateText.lineOffsetOfColumn(event.lineText, marginColumn, tabWidth);
+		styleRange.start = startLineOffset + offsetOfColumn;
+		styleRange.length = endLineOffset - styleRange.start;
+		
+		styleRange.background = globalMarginBackground();
+		styleRange.foreground = globalMarginForeground();
+		
+		addStyleRangeWithoutOverlaps(styleRanges, styleRange);
+	}
 
 	private void addStyleRangeWithoutOverlaps(ArrayList<StyleRange> styleRanges, StyleRange styleRange) {
 		if (styleRanges.size() == 0) {

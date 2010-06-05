@@ -615,4 +615,63 @@ public class MateText {
 			this.position = position;
 		}
 	}
+	
+	// See the table in the comment for columnOfLineOffset. This method translates from
+	// column to lineOffset in that table.
+	public static int lineOffsetOfColumn(String line, int targetColumn, int tabWidth) {
+		int offset = 0;
+		int newOffset = 0;
+		int column = 0;
+		int prevOffset = 0;
+		int prevColumn = 0;
+		while ((newOffset = line.indexOf("\t", offset)) != -1) {
+			newOffset++;
+			prevOffset = offset;
+			prevColumn = column;
+			column += newOffset - offset + tabWidth - 1;
+			offset = newOffset;
+			if (column > targetColumn)
+				return prevOffset + (targetColumn - prevColumn);
+			else if (column == targetColumn)
+				return offset;
+		}
+		return offset + targetColumn - column;
+	}
+
+	// if line is "\t\tasd", tab width is 4, then
+	// 
+	// lineOffset, column
+	// 0           0
+	// 1           4
+	// 2           8
+	// 3           9
+	// 4           10
+	// 5           11
+	// 6           12 (note past the end of the string)
+	//
+	// This function translates from lineOffset to column
+	public static int columnOfLineOffset(String line, int lineOffset, int tabWidth) {
+		int stringOffset = Math.max(lineOffset, line.length());
+		String before = line.substring(0, stringOffset);
+		int length = before.length();
+		return (length + (tabWidth - 1)*countMatches(before, "\t"));
+	}
+	
+	private static boolean isEmpty(String cs) {
+		return cs == null || cs.length() == 0;
+	}
+	
+	private static int countMatches(String str, String sub) {
+		if (isEmpty(str) || isEmpty(sub)) {
+			return 0;
+		}
+		int count = 0;
+		int idx = 0;
+		while ((idx = str.indexOf(sub, idx)) != -1) {
+			count++;
+			idx += sub.length();
+		}
+		return count;
+	}
+//  
 }

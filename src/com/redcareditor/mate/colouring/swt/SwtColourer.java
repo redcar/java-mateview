@@ -219,19 +219,20 @@ public class SwtColourer implements Colourer {
 		}
 	}
     
-    private boolean themeHasMarginColours() {
-        return true;
-    }
-    
-    private Color globalMarginForeground() {
-        return ColourUtil.getColour("#AAAAAA");
-    }
-
+	private boolean themeHasMarginColours() {
+		return (theme.globalSettings.get("marginForeground") != null &&
+				theme.globalSettings.get("marginBackground") != null);
+	}
+	
+	private Color globalMarginForeground() {
+		return ColourUtil.getColour(theme.globalSettings.get("marginForeground"));
+	}
+        
     private Color globalMarginBackground() {
-        return ColourUtil.getColour("#222222");
+        return ColourUtil.getColour(theme.globalSettings.get("marginBackground"));
     }
-
-    private boolean isColorDefined(String colour) {
+	
+	private boolean isColorDefined(String colour) {
 		return colour != null && !(colour.length() == 0);
 	}
 

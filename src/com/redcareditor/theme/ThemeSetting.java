@@ -16,6 +16,8 @@ public class ThemeSetting {
 	public String background;
 	public String foreground;
 	public String fontStyle;
+    public String marginBackground;
+    public String marginForeground;
 	
 	public List<ScopeMatcher> matchers;
 	

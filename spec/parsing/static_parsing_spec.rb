@@ -457,6 +457,19 @@ JAVA
 END
     end
   end
+  
+  describe "when parsing JavaScript" do
+    before do
+      @mt.set_grammar_by_name("JavaScript")
+    end
+    
+    it "should parse the following line and not hang" do
+      @st.text = <<JAVASCRIPT
+C=z&&z.events;if(z&&C){if(b&&b.type){d=b.handler;b=b.type}if(!b||typeof b==="string"&&b.charAt(0)==="."){b=b||"";for(e in C)c.event.remove(a,e+b)}else{for(b=b.split(" ");e=b[j++];){n=e;i=e.indexOf(".")<0;o=[];if(!i){o=e.split(".");e=o.shift();k=new RegExp("(^|\\.)"+c.map(o.slice(0).sort(),db).join("\\.(?:.*\\.)?")+"(\\.|$)")}if(r=C[e])if(d){n=c.event.special[e]||{};for(B=f||0;B<r.length;B++){u=r[B];if(d.guid===u.guid){if(i||k.test(u.namespace)){f==null&&r.splice(B--,1);n.remove&&n.remove.call(a,u)}if(f!=
+JAVASCRIPT
+      puts @mt.parser.root.pretty(0)
+    end
+  end
 end
 
 

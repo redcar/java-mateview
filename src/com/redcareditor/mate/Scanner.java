@@ -41,14 +41,13 @@ public class Scanner implements Iterable<Marker> {
 		logger.addHandler(MateText.consoleHandler());
 	}
 
-
 	public Match scanForMatch(int from, Pattern p) {
 		int maxLength = Math.min(MAX_LINE_LENGTH, this.lineLength);		
 		Match match = null;
 		if (p instanceof SinglePattern) {
 			SinglePattern sp = (SinglePattern) p;
 			if (sp.match.regex != null) {
-				match = sp.match.search(line, from, maxLength);
+				match = sp.match.search(this.line, from, maxLength);
 			}
 		}
 		else if (p instanceof DoublePattern) {
@@ -63,7 +62,7 @@ public class Scanner implements Iterable<Marker> {
 	public Marker findNextMarker() {
 		if (position >= this.lineLength)
 			return null;
-		//logger.info(String.format("scanning: '%s' from %d to %d (current_scope is %s)", this.line.replaceAll("\n", ""), this.position, this.lineLength, currentScope.name));
+		//logger.info(String.format("scanning: '%s' from %d to %d [%d] (current_scope is %s)", this.line.replaceAll("\n", ""), this.position, this.lineLength, this.line.length(), currentScope.name));
 		if (position > MAX_LINE_LENGTH)
 			return null;
 		Marker bestMarker = null;
@@ -102,10 +101,10 @@ public class Scanner implements Iterable<Marker> {
 			int positionPrev = position-1;
 			Match match;
 			while ((match = scanForMatch(positionNow, p)) != null &&
-				   positionNow != positionPrev // some regex's have zero width (meta.selector.css)
+					match.getCapture(0).start >= positionNow &&
+					positionNow != positionPrev // some regex's have zero width (meta.selector.css)
 				) {
 				positionPrev = positionNow;
-				// logger.info(String.format("  matched: %s (%d-%d)", p.prettyName(), match.getCapture(0).start, match.getCapture(0).end));
 				Marker newMarker = new Marker();
 				newMarker.pattern = p;
 				newMarker.match = match;

@@ -66,6 +66,11 @@ class MateExample < Jface::ApplicationWindow
     set_html_action.text = "Set HTML Grammar"
     file_menu.add set_html_action
     
+    set_java_script_action = SetJavaScript.new
+    set_java_script_action.window = self
+    set_java_script_action.text = "Set JavaScript Grammar"
+    file_menu.add set_java_script_action
+    
     set_mc_action = SetMacClassic.new
     set_mc_action.window = self
     set_mc_action.text = "Set Mac Classic"
@@ -242,6 +247,14 @@ class MateExample < Jface::ApplicationWindow
     end
   end
   
+  class SetJavaScript < Jface::Action
+    attr_accessor :window
+    
+    def run
+      @window.mate_text.set_grammar_by_name("JavaScript")
+    end
+  end
+  
   class ReplaceContents1 < Jface::Action
     attr_accessor :window
 
@@ -295,7 +308,10 @@ HTML
 
     def run
       src = File.read("lib/example/jquery-142min.js")
+      s = Time.now
       @window.mate_text.getMateDocument.set(src)
+      puts "parse took #{Time.now - s}s"
+      puts "num scopes: #{@window.mate_text.parser.root.count_descendants}"
     end
   end
     

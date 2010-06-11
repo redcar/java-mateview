@@ -275,8 +275,19 @@ public class SwtColourer implements Colourer {
 			return;
 		int eventLine = mateText.getControl().getLineAtOffset(event.lineOffset);
 		// System.out.printf("c%d, ", eventLine);
-		// System.out.printf("[Color] colouring %d\n", eventLine);
-		ArrayList<Scope> scopes = mateText.parser.root.scopesOnLine(eventLine);
+		
+		// ArrayList<Scope> scopes = mateText.parser.root.scopesOnLine(eventLine);
+		int startLineOffset = event.lineOffset;
+		int endLineOffset;
+		
+		if (eventLine >= mateText.getControl().getLineCount() - 1)
+			endLineOffset = mateText.getControl().getCharCount();
+		else
+			endLineOffset = mateText.getControl().getOffsetAtLine(eventLine + 1);
+		
+		ArrayList<Scope> scopes = mateText.parser.root.scopesBetween(startLineOffset, endLineOffset);
+		//System.out.printf("[Color] colouring %d (%d-%d) n%d\n", eventLine, startLineOffset, endLineOffset, scopes.size());
+		
 		// System.out.printf("[Color] got to colour %d scopes\n", scopes.size());
 		ArrayList<StyleRange> styleRanges = new ArrayList<StyleRange>();
 		for (Scope scope : scopes) {

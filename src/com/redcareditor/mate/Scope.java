@@ -245,6 +245,23 @@ public class Scope implements Comparable<Scope>{
 		}
 	}
 	
+	public ArrayList<Scope> scopesBetween(int startOffset, int endOffset) {
+		ArrayList<Scope> scopes = new ArrayList<Scope>();
+		if (getStart().getOffset() < endOffset && getEnd().getOffset() >= startOffset)
+			scopes.add(this);
+		childScopesBetween(startOffset, endOffset, scopes);
+		return scopes;
+	}
+	
+	public void childScopesBetween(int startOffset, int endOffset, ArrayList<Scope> scopes) {
+		for (Scope child : children) {
+			if (child.getStart().getOffset() < endOffset && child.getEnd().getOffset() >= startOffset) {
+				scopes.add(child);
+				child.childScopesBetween(startOffset, endOffset, scopes);
+			}
+		}
+	}
+	
 	public boolean overlapsWith(Scope other) {
 		// sd1    +---
 		// sd2  +---

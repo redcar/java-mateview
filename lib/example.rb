@@ -51,6 +51,11 @@ class MateExample < Jface::ApplicationWindow
     replace2_action.text = "Contents HTML"
     file_menu.add replace2_action
     
+    replace3_action = ReplaceContents3.new
+    replace3_action.window = self
+    replace3_action.text = "Contents long-lined JavaScript (slow)"
+    file_menu.add replace3_action
+    
     set_ruby_action = SetRuby.new
     set_ruby_action.window = self
     set_ruby_action.text = "Set Ruby Grammar"
@@ -285,6 +290,15 @@ HTML
     end
   end
   
+  class ReplaceContents3 < Jface::Action
+    attr_accessor :window
+
+    def run
+      src = File.read("lib/example/jquery-142min.js")
+      @window.mate_text.getMateDocument.set(src)
+    end
+  end
+    
   def self.run
     JavaMateView::Bundle.load_bundles("input/")
     p JavaMateView::Bundle.bundles.to_a.map {|b| b.name }

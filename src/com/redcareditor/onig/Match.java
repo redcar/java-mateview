@@ -35,8 +35,7 @@ public class Match implements Iterable<Range> {
 	}
 
 	public Range getCapture(int capture) {
-		// checkBounds(capture);
-		updateCharOffset();
+		updateCharOffset(null);
 		return new Range(
 				charOffsets.beg[capture],
 				charOffsets.end[capture]
@@ -44,8 +43,7 @@ public class Match implements Iterable<Range> {
 	}
 
 	public Range getByteCapture(int capture) {
-		// checkBounds(capture);
-		updateCharOffset();
+		updateCharOffset(null);
 		return new Range(
 				region.beg[capture],
 				region.end[capture]
@@ -75,7 +73,7 @@ public class Match implements Iterable<Range> {
 		}
 	}
  
-	private void updateCharOffset() {
+	public void updateCharOffset(CharacterOffsetCache charOffsetCache) {
 		if (charOffsetUpdated) return;
  
 		int numRegs = region == null ? 1 : region.numRegs;
@@ -86,9 +84,9 @@ public class Match implements Iterable<Range> {
 		for (int i = 0; i < pairs.length; i++) pairs[i] = new Pair();
  
 		int numPos = 0;
-		// System.out.printf("regions (numRegs:%d):\n", numRegs);
+		System.out.printf("regions (numRegs:%d):\n", numRegs);
 		for (int i = 0; i < numRegs; i++) {
-			// System.out.printf(" [%d, %d]\n", region.beg[i], region.end[i]);
+			System.out.printf(" [%d, %d]\n", region.beg[i], region.end[i]);
 			if (region.beg[i] < 0) {
 				numPos++; numPos++;
 				continue;
@@ -97,9 +95,9 @@ public class Match implements Iterable<Range> {
 			pairs[numPos++].bytePos = region.end[i];
 		}
  
-		// for (Pair pair : pairs) {
-		// 	System.out.printf("  * %d\n", pair.bytePos);
-		// }
+		//for (Pair pair : pairs) {
+		//	System.out.printf("  * %d\n", pair.bytePos);
+		//}
 		
 		Arrays.sort(pairs);
  
@@ -183,7 +181,7 @@ public class Match implements Iterable<Range> {
 		return end - p >= enc.minLength() ? enc.minLength() : end - p;
 	}
 
-	public static int strLength(Encoding enc, byte[] bytes, int p, int end) {
+	public static int strLength(Encoding enc, byte[] bytes, int p, int end, CharacterOffsetCache charOffsetCache) {
 		if (enc.isFixedWidth()) {
 			return (end - p + enc.minLength() - 1) / enc.minLength();
 		} else if (enc.isAsciiCompatible()) {

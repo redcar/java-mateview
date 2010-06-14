@@ -9,6 +9,7 @@ import java.util.logging.Level;
 
 import com.redcareditor.onig.Match;
 import com.redcareditor.onig.Rx;
+import com.redcareditor.onig.CharacterOffsetCache;
 
 public class Scanner implements Iterable<Marker> {
 	public static int MAX_LINE_LENGTH = 500;
@@ -18,6 +19,8 @@ public class Scanner implements Iterable<Marker> {
 	public int lineLength;
 	public int lineIx;
 	public Logger logger;
+	
+	private CharacterOffsetCache charOffsetCache;
 
 	public void setCurrentScope(Scope scope) {
 		this.currentScope = scope;
@@ -39,6 +42,7 @@ public class Scanner implements Iterable<Marker> {
 			logger.removeHandler(h);
 		}
 		logger.addHandler(MateText.consoleHandler());
+		charOffsetCache = new CharacterOffsetCache(lineLength);
 	}
 
 	public Match scanForMatch(int from, Pattern p) {
@@ -55,6 +59,8 @@ public class Scanner implements Iterable<Marker> {
 				match = ((DoublePattern) p).begin.search(this.line, from, maxLength);
 			}
 		}
+		if (match != null)
+			match.updateCharOffset(charOffsetCache);
 		return match;
 	}
 	
@@ -72,6 +78,8 @@ public class Scanner implements Iterable<Marker> {
 		if (closingRegex != null && closingRegex.usable()) {
 			//logger.info(String.format("closing regex: '%s'", closingRegex.pattern));
 			Match match = closingRegex.search(this.line, this.position, this.lineLength);
+			if (match != null)
+				match.updateCharOffset(charOffsetCache);
 			if (match != null && 
 			       !(match.getCapture(0).start == currentScope.getStart().getLineOffset() && 
 			         currentScope.getStart().getLine() == this.lineIx)

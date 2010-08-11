@@ -61,4 +61,8 @@ unless defined?(JavaMateView)
     import com.redcareditor.onig.Rx
     import com.redcareditor.onig.Match
   end
+  
+  module Util
+    import com.redcareditor.util.swt.ColourUtil
+  end
 end

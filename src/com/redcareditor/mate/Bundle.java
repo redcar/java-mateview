@@ -51,10 +51,9 @@ public class Bundle {
 	}
 
 	public static void loadBundles(String textmateDir) {
-		if (getBundles() != null) {
-			return;
+		if (getBundles() == null) {
+  		bundles = new ArrayList<Bundle>();
 		}
-		bundles = new ArrayList<Bundle>();
 		for (String bundleDir : bundleDirs(textmateDir)) {
 //			System.out.printf("loading %s\n", bundleDir);
 			Bundle bundle = new Bundle(bundleDir.split("\\.")[0]);

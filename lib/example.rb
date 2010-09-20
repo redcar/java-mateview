@@ -1,4 +1,5 @@
 
+Dir[File.dirname(__FILE__) + "/*.jar"].each {|fn| require fn }
 require File.join(File.dirname(__FILE__), *%w(.. src ruby java-mateview))
 
 class MateExample < Jface::ApplicationWindow

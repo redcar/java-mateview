@@ -1,6 +1,4 @@
 
-Dir[File.dirname(__FILE__) + "/*.jar"].each {|fn| require fn }
-
 module JavaMateView
   import com.redcareditor.mate.Bundle
   import com.redcareditor.mate.Grammar

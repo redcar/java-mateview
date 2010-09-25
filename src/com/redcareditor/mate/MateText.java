@@ -253,15 +253,18 @@ public class MateText {
     public void removeAnnotationListener(IAnnotationAreaListener listener) {
         annotationListeners.remove(listener);
     }
+	
     public void setLineNumbersVisible(boolean val) {
         if (isSingleLine()) return;
         redrawRuler(val, getAnnotationsVisible());
     }
      
-    public void setAnnotationsVisible(boolean val) {
-        if (isSingleLine()) return;
-        redrawRuler(getLineNumbersVisible(), val);
-    }
+	// the annotationRuler doesn't seem to like being added/removed
+	// (images don't draw), so it's always visible for now.
+	//public void setAnnotationsVisible(boolean val) {
+    //    if (isSingleLine()) return;
+    //    redrawRuler(getLineNumbersVisible(), val);
+	//}
  
     public boolean getLineNumbersVisible() {
         if (isSingleLine()) return false;
@@ -282,13 +285,10 @@ public class MateText {
 
     private void redrawRuler(boolean showLineNumbers, boolean showAnnotations) {
         compositeRuler.removeDecorator(lineNumbers);
-        compositeRuler.removeDecorator(annotationRuler);
-        if (showLineNumbers)
-            compositeRuler.addDecorator(0, (IVerticalRulerColumn) lineNumbers);
-        if (showAnnotations)
-            compositeRuler.addDecorator(0, (IVerticalRulerColumn) annotationRuler);
-        compositeRuler.relayout();
-    }
+		if (showAnnotations)
+			compositeRuler.addDecorator(1, (IVerticalRulerColumn) lineNumbers);
+		compositeRuler.relayout();
+	}
     
 	public boolean isSingleLine() {
 		return singleLine;
@@ -480,7 +480,6 @@ public class MateText {
 		}
 	}
 
-	// santa's little helper
 	class AnnotationMarkerAccess implements IAnnotationAccess, IAnnotationAccessExtension {
 		public Object getType(Annotation annotation) {
 			return annotation.getType();

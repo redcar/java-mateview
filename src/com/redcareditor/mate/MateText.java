@@ -534,7 +534,15 @@ public class MateText {
     // annotation hover manager
 	class AnnotationHover implements IAnnotationHover, ITextHover {
 		public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
-			Iterator ite = fAnnotationModel.getAnnotationIterator();
+			StyledText text = getTextWidget();
+			int startOffset = text.getOffsetAtLine(lineNumber);
+	        int endOffset;
+			if (lineNumber == text.getLineCount() - 1) 
+				endOffset = text.getCharCount();
+			else 
+				endOffset = text.getOffsetAtLine(lineNumber + 1);
+			Iterator ite = fAnnotationModel.getAnnotationIterator(
+				startOffset, endOffset - startOffset, false, true);
 			
 			ArrayList all = new ArrayList();
 			

@@ -56,13 +56,24 @@ public class SwtColourer implements Colourer {
 				int marginColumn = mateText.getMarginColumn();
 				if (marginColumn == -1)
 					return;
-				Color foreground = e.gc.getForeground();
+				Color prevColour;
 				int avgWidth = e.gc.getFontMetrics().getAverageCharWidth();
 				Rectangle controlBounds = control.getBounds();
 		   		Color marginBg = Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
-				e.gc.setForeground(marginBg);
-				e.gc.drawLine(avgWidth * marginColumn, 0, avgWidth * marginColumn, controlBounds.height);
-				e.gc.setForeground(foreground);
+				if (e.gc.getAdvanced()) {
+					prevColour = e.gc.getBackground();
+					e.gc.setBackground(marginBg);
+					int alpha = e.gc.getAlpha();
+					e.gc.setAlpha(64); // Draw transparently over widget. We cannot draw under the text (!)
+					e.gc.fillRectangle(avgWidth * marginColumn, 0, controlBounds.width, controlBounds.height);
+					e.gc.setAlpha(alpha);
+					e.gc.setForeground(prevColour);
+				} else {
+					prevColour = e.gc.getForeground();
+					e.gc.setForeground(marginBg);
+					e.gc.drawLine(avgWidth * marginColumn, 0, avgWidth * marginColumn, controlBounds.height);
+					e.gc.setForeground(prevColour);
+				}
 			}
 		});
 		this.control.addLineStyleListener(new LineStyleListener() {

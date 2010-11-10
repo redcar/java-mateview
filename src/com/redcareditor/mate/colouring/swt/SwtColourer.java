@@ -12,6 +12,8 @@ import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.custom.LineStyleEvent;
@@ -49,6 +51,20 @@ public class SwtColourer implements Colourer {
 
 		control = mateText.getControl();
 
+		this.control.addPaintListener(new PaintListener() {
+			public void paintControl(PaintEvent e) {
+				int marginColumn = mateText.getMarginColumn();
+				if (marginColumn == -1)
+					return;
+				Color foreground = e.gc.getForeground();
+				int avgWidth = e.gc.getFontMetrics().getAverageCharWidth();
+				Rectangle controlBounds = control.getBounds();
+		   		Color marginBg = Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
+				e.gc.setForeground(marginBg);
+				e.gc.drawLine(avgWidth * marginColumn, 0, avgWidth * marginColumn, controlBounds.height);
+				e.gc.setForeground(foreground);
+			}
+		});
 		this.control.addLineStyleListener(new LineStyleListener() {
 			public void lineGetStyle(LineStyleEvent event) {
 				colourLine(event);

@@ -1,32 +1,25 @@
 package com.redcareditor.mate.colouring.swt;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-
-import org.eclipse.jface.text.JFaceTextUtil;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.VerifyListener;
-import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.custom.LineStyleEvent;
 import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Display;
 
@@ -51,31 +44,7 @@ public class SwtColourer implements Colourer {
 
 		control = mateText.getControl();
 
-		this.control.addPaintListener(new PaintListener() {
-			public void paintControl(PaintEvent e) {
-				int marginColumn = mateText.getMarginColumn();
-				if (marginColumn == -1)
-					return;
-				Color prevColour;
-				int avgWidth = e.gc.getFontMetrics().getAverageCharWidth();
-				Rectangle controlBounds = control.getBounds();
-		   		Color marginBg = Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
-				if (e.gc.getAdvanced()) {
-					prevColour = e.gc.getBackground();
-					e.gc.setBackground(marginBg);
-					int alpha = e.gc.getAlpha();
-					e.gc.setAlpha(64); // Draw transparently over widget. We cannot draw under the text (!)
-					e.gc.fillRectangle(avgWidth * marginColumn, 0, controlBounds.width, controlBounds.height);
-					e.gc.setAlpha(alpha);
-					e.gc.setForeground(prevColour);
-				} else {
-					prevColour = e.gc.getForeground();
-					e.gc.setForeground(marginBg);
-					e.gc.drawLine(avgWidth * marginColumn, 0, avgWidth * marginColumn, controlBounds.height);
-					e.gc.setForeground(prevColour);
-				}
-			}
-		});
+		this.control.addPaintListener(new MarginPaintListener(mateText));
 		this.control.addLineStyleListener(new LineStyleListener() {
 			public void lineGetStyle(LineStyleEvent event) {
 				colourLine(event);

@@ -30,28 +30,28 @@ public class MarginPaintListener implements PaintListener {
 	}
 
 	private void drawMargin(GC gc, int marginColumn) {
-		int avgWidth = gc.getFontMetrics().getAverageCharWidth();
+		int width = gc.getFontMetrics().getAverageCharWidth() * marginColumn + control.getLeftMargin();
 		Rectangle controlBounds = control.getBounds();
 		if (gc.getAdvanced()) {
-			drawMarginOverlay(gc, marginColumn, avgWidth, controlBounds);
+			drawMarginOverlay(gc, width, controlBounds);
 		} else {
-			drawMarginLine(gc, marginColumn, avgWidth, controlBounds);
+			drawMarginLine(gc, width, controlBounds);
 		}
 	}
 
-	private void drawMarginLine(GC gc, int marginColumn, int avgWidth, Rectangle controlBounds) {
+	private void drawMarginLine(GC gc, int width, Rectangle controlBounds) {
 		Color fgColor = gc.getForeground();
 		gc.setForeground(getMarginColor());
-		gc.drawLine(avgWidth * marginColumn, 0, avgWidth * marginColumn, controlBounds.height);
+		gc.drawLine(width, 0, width, controlBounds.height);
 		gc.setForeground(fgColor);
 	}
 
-	private void drawMarginOverlay(GC gc, int marginColumn, int avgWidth, Rectangle controlBounds) {
+	private void drawMarginOverlay(GC gc, int width, Rectangle controlBounds) {
 		Color bgColor = gc.getBackground();
 		int alpha = gc.getAlpha();
 		gc.setBackground(getMarginColor());
 		gc.setAlpha(64); // Draw transparently over widget. We cannot draw under the text (!)
-		gc.fillRectangle(avgWidth * marginColumn, 0, controlBounds.width, controlBounds.height);
+		gc.fillRectangle(width, 0, controlBounds.width, controlBounds.height);
 		gc.setAlpha(alpha);
 		gc.setForeground(bgColor);
 	}

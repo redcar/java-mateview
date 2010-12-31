@@ -535,6 +535,7 @@ public class MateText {
 	class AnnotationHover implements IAnnotationHover, ITextHover {
 		public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
 			StyledText text = getTextWidget();
+			if (lineNumber >= text.getLineCount()) return null;
 			int startOffset = text.getOffsetAtLine(lineNumber);
 	        int endOffset;
 			if (lineNumber == text.getLineCount() - 1) 

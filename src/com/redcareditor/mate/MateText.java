@@ -66,22 +66,22 @@ public class MateText {
 
 	private MateTextUndoManager undoManager;
 	private List<IGrammarListener> grammarListeners;
-	
+
 	private boolean singleLine;
 	private WhitespaceCharacterPainter whitespaceCharacterPainter;
     private boolean showingInvisibles;
-    
+
     private static HashMap<String, Image> annotationImages = new HashMap<String, Image>();
-    
+
     // annotation model
     private AnnotationModel fAnnotationModel = new AnnotationModel();
     private IAnnotationAccess fAnnotationAccess;
     private AnnotationPainter annotationPainter;
     private MouseListener annotationMouseListener;
     private ColorCache cc;
-    
+
     private int marginColumn = -1;
-    
+
 	public MateText(Composite parent) {
 		this(parent, false);
 	}
@@ -93,10 +93,10 @@ public class MateText {
 			createSingleLineSourceViewer(parent);
 		else
 			createSourceViewer(parent);
-		
+
 		whitespaceCharacterPainter = new WhitespaceCharacterPainter(viewer);
 		showingInvisibles = false;
-		
+
 		colourer = new SwtColourer(this);
 		mateDocument = new SwtMateDocument(this);
 		grammarListeners = new ArrayList<IGrammarListener>();
@@ -110,12 +110,12 @@ public class MateText {
 		logger.addHandler(MateText.consoleHandler());
 		logger.info("Created MateText");
 	}
-	
+
 	private void createSingleLineSourceViewer(Composite parent) {
 		viewer = new SourceViewer(parent, null, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL | SWT.SINGLE);
 		viewer.setDocument(document);
 	}
-	
+
 	private void createSourceViewer(Composite parent) {
         fAnnotationAccess = new AnnotationMarkerAccess();
 
@@ -124,31 +124,31 @@ public class MateText {
 		compositeRuler = new CompositeRuler();
 		annotationRuler = new AnnotationRulerColumn(fAnnotationModel, 16, fAnnotationAccess);
 		compositeRuler.setModel(fAnnotationModel);
-        
+
 		// add what types are show on the different rulers
-        
+
 		lineNumbers = new LineNumberRulerColumn();
 		compositeRuler.addDecorator(0, lineNumbers);
 		compositeRuler.addDecorator(0, annotationRuler);
 
 		viewer = new SourceViewer(parent, compositeRuler, SWT.FULL_SELECTION | SWT.HORIZONTAL | SWT.VERTICAL);
 		viewer.setDocument(document, fAnnotationModel);
-        
+
 		// hover manager that shows text when we hover
 		AnnotationHover ah = new AnnotationHover();
 		AnnotationConfiguration ac = new AnnotationConfiguration();
 		AnnotationBarHoverManager fAnnotationHoverManager = new AnnotationBarHoverManager(compositeRuler, viewer, ah, ac);
 		fAnnotationHoverManager.install(annotationRuler.getControl());
-        
+
 		// to paint the annotations
 		annotationPainter = new AnnotationPainter(viewer, fAnnotationAccess);
-        
+
 		// this will draw the squigglies under the text
 		viewer.addPainter(annotationPainter);
-        
+
         createAnnotationMouseListener();
     }
-    
+
     private void createAnnotationMouseListener() {
 		annotationMouseListener = new MouseListener() {
 			public void mouseUp(MouseEvent event) {
@@ -174,11 +174,11 @@ public class MateText {
 		annotationRuler.getControl().addMouseListener(annotationMouseListener);
 
     }
-    
+
     public int getMarginColumn() {
         return marginColumn;
     }
-    
+
     public void setMarginColumn(int val) {
         this.marginColumn = val;
         redraw();
@@ -186,24 +186,24 @@ public class MateText {
 
     public void addAnnotationType(String type, String imagePath, RGB rgb) {
         if (singleLine) return;
-        
+
         annotationRuler.addAnnotationType(type);
         annotationPainter.addAnnotationType(type);
 		annotationPainter.setAnnotationTypeColor(type, new Color(Display.getDefault(), rgb));
         MateText.annotationImages.put(type, new Image(Display.getDefault(), imagePath));
     }
-    
+
     public MateAnnotation addAnnotation(String type, int line, String text, int start, int length) {
         if (singleLine) return null;
-        
+
         MateAnnotation mateAnnotation = new MateAnnotation(type, line, text);
 		fAnnotationModel.addAnnotation(mateAnnotation, new Position(start, length));
         return mateAnnotation;
     }
-    
+
     public ArrayList<MateAnnotation> annotations() {
         ArrayList<MateAnnotation> result = new ArrayList<MateAnnotation>();
-        
+
         Iterator i = fAnnotationModel.getAnnotationIterator();
         while (i.hasNext()) {
             MateAnnotation next = (MateAnnotation) i.next();
@@ -211,10 +211,10 @@ public class MateText {
         }
         return result;
     }
-    
+
     public ArrayList<MateAnnotation> annotationsOnLine(int line) {
         ArrayList<MateAnnotation> result = new ArrayList<MateAnnotation>();
-        
+
         StyledText text = getTextWidget();
         int startOffset = text.getOffsetAtLine(line);
         int endOffset;
@@ -230,57 +230,57 @@ public class MateText {
         }
         return result;
     }
-    
+
     public void removeAnnotation(MateAnnotation ann) {
         fAnnotationModel.removeAnnotation(ann);
     }
-    
+
     public void removeAllAnnotations() {
         fAnnotationModel.removeAllAnnotations();
     }
-    
-    private ArrayList<IAnnotationAreaListener> annotationListeners = 
+
+    private ArrayList<IAnnotationAreaListener> annotationListeners =
         new ArrayList<IAnnotationAreaListener>();
-    
+
     public void addAnnotationListener(IAnnotationAreaListener listener) {
         annotationListeners.add(listener);
     }
-    
+
     public ArrayList<IAnnotationAreaListener> getAnnotationListeners() {
         return annotationListeners;
     }
-    
+
     public void removeAnnotationListener(IAnnotationAreaListener listener) {
         annotationListeners.remove(listener);
     }
-	
+
     public void setLineNumbersVisible(boolean val) {
         if (isSingleLine()) return;
         redrawRuler(val, getAnnotationsVisible());
     }
-     
+
 	// the annotationRuler doesn't seem to like being added/removed
 	// (images don't draw), so it's always visible for now.
 	//public void setAnnotationsVisible(boolean val) {
     //    if (isSingleLine()) return;
     //    redrawRuler(getLineNumbersVisible(), val);
 	//}
- 
+
     public boolean getLineNumbersVisible() {
         if (isSingleLine()) return false;
         Iterator iterator = compositeRuler.getDecoratorIterator();
         while (iterator.hasNext())
-            if (((IVerticalRulerColumn) iterator.next()) == lineNumbers) 
+            if (((IVerticalRulerColumn) iterator.next()) == lineNumbers)
                 return true;
-        return false;        
+        return false;
     }
-    
+
     public boolean getAnnotationsVisible() {
         Iterator iterator = compositeRuler.getDecoratorIterator();
         while (iterator.hasNext())
-            if (((IVerticalRulerColumn) iterator.next()) == annotationRuler) 
+            if (((IVerticalRulerColumn) iterator.next()) == annotationRuler)
                 return true;
-        return false;        
+        return false;
     }
 
     private void redrawRuler(boolean showLineNumbers, boolean showAnnotations) {
@@ -289,11 +289,11 @@ public class MateText {
 			compositeRuler.addDecorator(1, (IVerticalRulerColumn) lineNumbers);
 		compositeRuler.relayout();
 	}
-    
+
 	public boolean isSingleLine() {
 		return singleLine;
 	}
-	
+
 	public void showInvisibles(boolean should) {
 		if (should) {
 			showingInvisibles = true;
@@ -303,7 +303,7 @@ public class MateText {
 			viewer.removePainter(whitespaceCharacterPainter);
 		}
 	}
-	
+
 	public boolean isShowingInvisibles() {
 		return showingInvisibles;
 	}
@@ -311,11 +311,11 @@ public class MateText {
 	public void attachUpdater() {
 
 	}
-	
+
 	public boolean getWordWrap() {
 		return getTextWidget().getWordWrap();
 	}
-	
+
 	public void setWordWrap(boolean val) {
 		getTextWidget().setWordWrap(val);
 	}
@@ -343,11 +343,11 @@ public class MateText {
 	public boolean shouldColour() {
 		return parser.shouldColour();
 	}
-	
+
 	public String scopeAt(int line, int line_offset) {
 		return parser.root.scopeAt(line, line_offset).hierarchyNames(true);
 	}
-	
+
 	// Sets the grammar explicitly by name.
 	// TODO: restore the uncolouring stuff
 	public boolean setGrammarByName(String name) {
@@ -438,6 +438,9 @@ public class MateText {
 		viewer.getTextWidget().setFont(font);
         if (!singleLine)
     		lineNumbers.setFont(font);
+		if (getLineNumbersVisible()){
+			redrawRuler(true, getAnnotationsVisible());
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -450,21 +453,21 @@ public class MateText {
         if (singleLine) return;
 		lineNumbers.setForeground(color);
 	}
-	
+
 	public void addGrammarListener(IGrammarListener listener) {
 		grammarListeners.add(listener);
 	}
-	
+
 	public void removeGrammarListener(IGrammarListener listener) {
 		grammarListeners.remove(listener);
 	}
-	
+
 	public void redraw() {
 		// SwtMateTextLocation startLocation = new SwtMateTextLocation(0, getMateDocument());
 		// SwtMateTextLocation endLocation = new SwtMateTextLocation(0 + getTextWidget().getCharCount(), getMateDocument());
 		getTextWidget().redraw();
 	}
-	
+
 	class AnnotationConfiguration implements IInformationControlCreator {
 		public IInformationControl createInformationControl(Shell shell) {
 			return new DefaultInformationControl(shell);
@@ -538,51 +541,51 @@ public class MateText {
 			if (lineNumber >= text.getLineCount()) return null;
 			int startOffset = text.getOffsetAtLine(lineNumber);
 	        int endOffset;
-			if (lineNumber == text.getLineCount() - 1) 
+			if (lineNumber == text.getLineCount() - 1)
 				endOffset = text.getCharCount();
-			else 
+			else
 				endOffset = text.getOffsetAtLine(lineNumber + 1);
 			Iterator ite = fAnnotationModel.getAnnotationIterator(
 				startOffset, endOffset - startOffset, false, true);
-			
+
 			ArrayList all = new ArrayList();
-			
+
 			while (ite.hasNext()) {
 				Annotation a = (Annotation) ite.next();
 				if (a instanceof MateAnnotation) {
 					all.add(((MateAnnotation)a).getText());
 				}
 			}
-			
+
 			StringBuffer total = new StringBuffer();
 			for (int x = 0; x < all.size(); x++) {
 				String str = (String) all.get(x);
 				total.append(" " + str + (x == (all.size()-1) ? "" : "\n"));
 			}
-			
+
 			return total.toString();
 		}
-		
+
 		public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 			return null;
 		}
-		
+
 		public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 			return null;
 		}
 	}
-    
+
     class MateAnnotation extends Annotation {
 		private IMarker marker;
 		private String text;
 		private int line;
 		private Position position;
         private String type;
-        
+
 		public MateAnnotation(IMarker marker) {
 			this.marker = marker;
 		}
-		
+
 		public MateAnnotation(String type, int line, String text) {
 			super(type, true, null);
 			this.marker = null;
@@ -590,40 +593,40 @@ public class MateText {
 			this.text = text;
             this.type = type;
 		}
-		
+
 		public IMarker getMarker() {
 			return marker;
 		}
-		
+
 		public int getLine() {
 			return line;
 		}
-		
+
 		public String getText() {
 			return text;
 		}
-		
+
 		public Image getImage() {
 			return MateText.annotationImages.get(this.type);
 		}
-		
+
 		public int getLayer() {
 			return 3;
 		}
-		
+
 		public String getType() {
 			return type;
 		}
-		
+
 		public Position getPosition() {
 			return position;
 		}
-		
+
 		public void setPosition(Position position) {
 			this.position = position;
 		}
 	}
-	
+
 	// See the table in the comment for columnOfLineOffset. This method translates from
 	// column to lineOffset in that table.
 	public static int lineOffsetOfColumn(String line, int targetColumn, int tabWidth) {
@@ -647,7 +650,7 @@ public class MateText {
 	}
 
 	// if line is "\t\tasd", tab width is 4, then
-	// 
+	//
 	// lineOffset, column
 	// 0           0
 	// 1           4
@@ -664,11 +667,11 @@ public class MateText {
 		int length = before.length();
 		return (length + (tabWidth - 1)*countMatches(before, "\t"));
 	}
-	
+
 	private static boolean isEmpty(String cs) {
 		return cs == null || cs.length() == 0;
 	}
-	
+
 	private static int countMatches(String str, String sub) {
 		if (isEmpty(str) || isEmpty(sub)) {
 			return 0;
@@ -681,5 +684,5 @@ public class MateText {
 		}
 		return count;
 	}
-//  
+//
 }

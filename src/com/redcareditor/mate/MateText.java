@@ -285,7 +285,7 @@ public class MateText {
 
     private void redrawRuler(boolean showLineNumbers, boolean showAnnotations) {
         compositeRuler.removeDecorator(lineNumbers);
-		if (showAnnotations)
+		if (showLineNumbers)
 			compositeRuler.addDecorator(1, (IVerticalRulerColumn) lineNumbers);
 		compositeRuler.relayout();
 	}

@@ -534,35 +534,43 @@ public class MateText {
 		}
 	}
 
-    // annotation hover manager
+	// annotation hover manager
 	class AnnotationHover implements IAnnotationHover, ITextHover {
 		public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
+			Iterator ite;
+			int startOffset;
+			int endOffset;
 			StyledText text = getTextWidget();
-			if (lineNumber >= text.getLineCount()) return null;
-			int startOffset = text.getOffsetAtLine(lineNumber);
-	        int endOffset;
-			if (lineNumber == text.getLineCount() - 1)
-				endOffset = text.getCharCount();
-			else
-				endOffset = text.getOffsetAtLine(lineNumber + 1);
-			Iterator ite = fAnnotationModel.getAnnotationIterator(
-				startOffset, endOffset - startOffset, false, true);
-
+			try {
+				if (lineNumber >= text.getLineCount()) return null;
+				startOffset = text.getOffsetAtLine(lineNumber);
+				if (lineNumber == text.getLineCount() - 1) {
+					endOffset = text.getCharCount();
+				} else {
+					endOffset = text.getOffsetAtLine(lineNumber + 1);
+				}
+				ite = fAnnotationModel.getAnnotationIterator(
+					startOffset, endOffset - startOffset, false, true);
+			} catch(java.lang.IllegalArgumentException e) {
+				System.out.printf("warning: got java.lang.IllegalArgumentException in AnnotationHover#getHoverInfo(%d). lineCount was %d\n", lineNumber, text.getLineCount());
+				return "";
+			}
+			
 			ArrayList all = new ArrayList();
-
+			
 			while (ite.hasNext()) {
 				Annotation a = (Annotation) ite.next();
 				if (a instanceof MateAnnotation) {
 					all.add(((MateAnnotation)a).getText());
 				}
 			}
-
+			
 			StringBuffer total = new StringBuffer();
 			for (int x = 0; x < all.size(); x++) {
 				String str = (String) all.get(x);
 				total.append(" " + str + (x == (all.size()-1) ? "" : "\n"));
 			}
-
+			
 			return total.toString();
 		}
 

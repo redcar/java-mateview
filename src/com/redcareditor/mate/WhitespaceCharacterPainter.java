@@ -41,7 +41,7 @@ public class WhitespaceCharacterPainter implements IPainter, PaintListener {
 
 	private static final char SPACE_SIGN= '\u00b7';
 	private static final char IDEOGRAPHIC_SPACE_SIGN= '\u00b0';
-	private static final char TAB_SIGN= '\u00bb';
+	private static final char TAB_SIGN= '\u22ef';
 	private static final char CARRIAGE_RETURN_SIGN= '\u00a4';
 	private static final char LINE_FEED_SIGN= '\u00ac';
 

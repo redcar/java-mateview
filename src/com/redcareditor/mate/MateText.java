@@ -542,8 +542,8 @@ public class MateText {
 			int startOffset;
 			int endOffset;
 			StyledText text = getTextWidget();
-			try {
-				if (lineNumber >= text.getLineCount()) return null;
+      try {
+				if (lineNumber < 0 || lineNumber >= text.getLineCount()) return null;
 				startOffset = text.getOffsetAtLine(lineNumber);
 				if (lineNumber == text.getLineCount() - 1) {
 					endOffset = text.getCharCount();
@@ -556,22 +556,22 @@ public class MateText {
 				System.out.printf("warning: got java.lang.IllegalArgumentException in AnnotationHover#getHoverInfo(%d). lineCount was %d\n", lineNumber, text.getLineCount());
 				return "";
 			}
-			
+
 			ArrayList all = new ArrayList();
-			
+
 			while (ite.hasNext()) {
 				Annotation a = (Annotation) ite.next();
 				if (a instanceof MateAnnotation) {
 					all.add(((MateAnnotation)a).getText());
 				}
 			}
-			
+
 			StringBuffer total = new StringBuffer();
 			for (int x = 0; x < all.size(); x++) {
 				String str = (String) all.get(x);
 				total.append(" " + str + (x == (all.size()-1) ? "" : "\n"));
 			}
-			
+
 			return total.toString();
 		}
 

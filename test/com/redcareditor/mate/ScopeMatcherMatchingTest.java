@@ -17,6 +17,11 @@ public class ScopeMatcherMatchingTest {
 	}
 	
 	@Test
+	public void shouldNotMatchSubstrings() {
+		assertFalse(testMatch("source.c", "source.coffee"));
+	}
+	
+	@Test
 	public void shouldTransformDots() {
 		assertFalse(testMatch("source.ruby", "sourcearuby comment"));
 		assertTrue(testMatch("source.ruby", "source.ruby comment"));

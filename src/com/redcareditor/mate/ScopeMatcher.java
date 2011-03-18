@@ -131,7 +131,7 @@ public class ScopeMatcher {
 					String s1 = subSelectorString.trim().replaceAll("\\.", "\\\\.");
 					String s2 = s1.replaceAll(" ", ").* .*(");
 //					System.out.printf("positive '%s'\n", "(" + s2 + ")");
-					m.pos_rx = Rx.createRx("(" + s2 + ")");
+					m.pos_rx = Rx.createRx("^(?:.*[^A-Za-z])?(" + s2 + ")(?:[^A-Za-z].*)?$");
 				} else {
 					String s1 = subSelectorString.trim().replaceAll("\\.", "\\\\.");
 					String s2 = s1.trim().replaceAll(" ", ".* .*");

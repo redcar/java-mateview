@@ -118,7 +118,7 @@ public class MateText {
 	}
 
 	private void createSourceViewer(Composite parent) {
-        fAnnotationAccess = new AnnotationMarkerAccess();
+		fAnnotationAccess = new AnnotationMarkerAccess();
 
 		cc = new ColorCache();
 
@@ -147,43 +147,43 @@ public class MateText {
 		// this will draw the squigglies under the text
 		viewer.addPainter(annotationPainter);
 
-        createAnnotationMouseListener();
-    }
+		createAnnotationMouseListener();
+	}
 
-    private void createAnnotationMouseListener() {
+	private void createAnnotationMouseListener() {
 		annotationMouseListener = new MouseListener() {
 			public void mouseUp(MouseEvent event) {
 				int lineNumber = annotationRuler.toDocumentLineNumber(event.y);
-                for (IAnnotationAreaListener l : annotationListeners) {
-                    l.mouseClick(lineNumber);
-                }
-            }
+				for (IAnnotationAreaListener l : annotationListeners) {
+					l.mouseClick(lineNumber);
+				}
+			}
 
 			public void mouseDown(MouseEvent event) {
 				int lineNumber = annotationRuler.toDocumentLineNumber(event.y);
-                System.out.printf("mouseDown line: %d\n", lineNumber);
-            }
+				System.out.printf("mouseDown line: %d\n", lineNumber);
+			}
 
 			public void mouseDoubleClick(MouseEvent event) {
 				int lineNumber = annotationRuler.toDocumentLineNumber(event.y);
-                System.out.printf("doubleClick line: %d\n", lineNumber);
-                for (IAnnotationAreaListener l : annotationListeners) {
-                    l.mouseDoubleClick(lineNumber);
-                }
-            }
+				System.out.printf("doubleClick line: %d\n", lineNumber);
+				for (IAnnotationAreaListener l : annotationListeners) {
+					l.mouseDoubleClick(lineNumber);
+				}
+			}
 		};
 		annotationRuler.getControl().addMouseListener(annotationMouseListener);
 
-    }
+	}
 
-    public int getMarginColumn() {
-        return marginColumn;
-    }
+	public int getMarginColumn() {
+		return marginColumn;
+	}
 
-    public void setMarginColumn(int val) {
-        this.marginColumn = val;
-        redraw();
-    }
+	public void setMarginColumn(int val) {
+		this.marginColumn = val;
+		redraw();
+	}
 
     public void addAnnotationType(String type, String imagePath, RGB rgb) {
         if (singleLine) return;

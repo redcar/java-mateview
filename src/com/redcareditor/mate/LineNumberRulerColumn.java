@@ -519,7 +519,7 @@ public class LineNumberRulerColumn implements IVerticalRulerColumn {
 		while (lines > Math.pow(10, digits) -1) {
 			++digits;
 		}
-		return digits;
+		return Math.max(digits, 3);
 	}
 
 	/**

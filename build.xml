@@ -40,7 +40,7 @@
 		</and>
 	</condition>
 
-	<condition property="platform" value="windows">
+	<condition property="platform" value="win32">
 		<os family="windows" />
 	</condition>
 
@@ -48,11 +48,19 @@
 		<pathelement location="${build.prod.dir}" />
 		<pathelement location="${build.test.dir}" />
 
-		<fileset dir="${lib.dir}">
+		<fileset dir="${lib.dir}/">
 			<include name="*.jar" />
 		</fileset>
 
-		<fileset dir="${lib.dir}/${platform}">
+		<fileset dir="${lib.dir}/javamateview">
+			<include name="*.jar" />
+		</fileset>
+
+		<fileset dir="${lib.dir}/jface_jars">
+			<include name="*.jar" />
+		</fileset>
+
+		<fileset dir="${lib.dir}/swt_jars/${platform}">
 			<include name="*.jar" />
 		</fileset>
 	</path>
@@ -82,9 +90,7 @@
 	
 	<target name="jar" depends="compile">
 		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="project.classpath" />
-		<delete dir="release"/>
-		<mkdir dir="release"/>
-		<jarjar destfile="release/java-mateview.jar" basedir="${build.prod.dir}">
+		<jarjar destfile="lib/javamateview/jar/java-mateview.jar" basedir="${build.prod.dir}">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="Class-Path" value=". lib vendor" />

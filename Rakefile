@@ -1,8 +1,6 @@
 require 'rake/clean'
 require 'net/http'
 
-JRUBY_VERSION = '1.3.1'
-
 jruby_command = case Config::CONFIG["host_os"]
   when /darwin/i
     'jruby -J-XstartOnFirstThread '
@@ -48,6 +46,32 @@ end
 
 
 namespace :build do
+  desc "Fetch the swt jars from the gem"
+  task :prepare do
+    require 'rubygems'
+    require 'java'
+    gem 'swt'
+    require 'swt/jar'
+    swt_jar_dir = File.dirname(Swt.jar_path)
+    
+    
+    mkdir_p File.expand_path("../lib/swt_jars", __FILE__)
+    %w(linux linux64 osx osx64 win32).each do |platform|
+      dir = File.expand_path("../lib/swt_jars/#{platform}", __FILE__)
+      mkdir_p dir
+      from = swt_jar_dir + "/swt_#{platform}.jar"
+      to   = dir + "/swt.jar"
+      cp from, to
+    end
+  
+    mkdir_p File.expand_path("../lib/jface_jars", __FILE__)
+    
+    Dir[swt_jar_dir + "/jface/org.ecl*.jar"].each do |from, to|
+      to = File.expand_path("../lib/jface_jars/#{File.basename(from)}", __FILE__)
+      cp from, to
+    end
+  end
+  
   desc "Get jruby-complete to build release jar"
   task :get_jruby do
     jruby_complete = "jruby-complete-#{JRUBY_VERSION}.jar"

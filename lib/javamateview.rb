@@ -1,4 +1,10 @@
 
+require 'javamateview/joni'
+require 'javamateview/jcodings'
+require 'javamateview/jdom'
+
+require 'javamateview/jar/java-mateview'
+
 module JavaMateView
   import com.redcareditor.mate.Bundle
   import com.redcareditor.mate.Grammar

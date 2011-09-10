@@ -1,8 +1,8 @@
 
 Gem::Specification.new do |s|
   s.name        = "redcar-javamateview"
-  s.version     = "0.1"
-  s.platform    = "java"
+  s.version     = "0.2"
+  s.platform    = "ruby"
   s.authors     = ["Daniel Lucraft"]
   s.email       = ["dan@fluentradical.com"]
   s.homepage    = "http://github.com/danlucraft/redcar-javamateview"

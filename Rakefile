@@ -51,15 +51,15 @@ namespace :build do
     require 'rubygems'
     require 'java'
     gem 'swt'
-    require 'swt/jar'
+    require 'swt/jar_loader'
     swt_jar_dir = File.dirname(Swt.jar_path)
     
     
     mkdir_p File.expand_path("../lib/swt_jars", __FILE__)
-    %w(linux linux64 osx osx64 win32).each do |platform|
+    %w(linux32 linux64 osx32 osx64 win32 win64).each do |platform|
       dir = File.expand_path("../lib/swt_jars/#{platform}", __FILE__)
       mkdir_p dir
-      from = swt_jar_dir + "/swt_#{platform}.jar"
+      from = swt_jar_dir + "/swt-#{platform}.jar"
       to   = dir + "/swt.jar"
       cp from, to
     end

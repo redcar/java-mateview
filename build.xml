@@ -10,7 +10,7 @@
 	<property name="test.report.dir" location="${build.dir}/test-reports" />
 	<property name="build.compiler" value="javac1.6"/>
 
-	<condition property="platform" value="osx">
+	<condition property="platform" value="osx32">
 		<and>
 			<os family="mac" />
 			<os family="unix" />
@@ -26,7 +26,7 @@
 		</and>
 	</condition>
 
-	<condition property="platform" value="linux">
+	<condition property="platform" value="linux32">
 		<and>
 			<os family="unix" />
 			<os arch="i386" />

@@ -163,8 +163,14 @@ public class SwtColourer implements Colourer {
 		for (int i = 0; i < control.getLineCount(); i ++)
 			control.setLineBackground(i, 1, ColourUtil.getColour(globalBackground()));
 		control.setLineBackground(currentLine, 1, ColourUtil.getColour(globalLineBackground()));
-		mateText.setGutterBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-		mateText.setGutterForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
+        Composite rulerControl = (Composite) mateText.getCompositeRuler().getControl();
+        for (Control c : rulerControl.getChildren()) {
+            c.setBackground(ColourUtil.getColour(globalLineBackground()));
+            c.setForeground(ColourUtil.getColour(globalForeground()));
+        }
+        rulerControl.getParent().setBackground(ColourUtil.getColour(globalLineBackground()));
+		mateText.setGutterBackground(ColourUtil.getColour(globalLineBackground()));
+		mateText.setGutterForeground(ColourUtil.getColour(globalForeground()));
 	}
 
 	public Theme getTheme() {

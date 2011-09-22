@@ -113,9 +113,9 @@ public class SwtColourer implements Colourer {
 		Color white = display.getSystemColor(SWT.COLOR_WHITE);
 		Color black = display.getSystemColor(SWT.COLOR_BLACK);
 		String backgroundColourString = globalBackground();
-		int red = Integer.parseInt(backgroundColourString.substring(1, 3), 16) ^ 
+		int red = Integer.parseInt(backgroundColourString.substring(1, 3), 16) ^
 					Integer.parseInt(caretColourString.substring(1, 3), 16);
-		int green = Integer.parseInt(backgroundColourString.substring(3, 5), 16) ^ 
+		int green = Integer.parseInt(backgroundColourString.substring(3, 5), 16) ^
 						Integer.parseInt(caretColourString.substring(3, 5), 16);
 		int blue = Integer.parseInt(backgroundColourString.substring(5, 7), 16) ^
 						Integer.parseInt(caretColourString.substring(5, 7), 16);
@@ -142,12 +142,14 @@ public class SwtColourer implements Colourer {
 		for (int i = 0; i < control.getLineCount(); i ++)
 			control.setLineBackground(i, 1, ColourUtil.getColour(globalBackground()));
 		control.setLineBackground(currentLine, 1, ColourUtil.getColour(globalLineBackground()));
-        Composite rulerControl = (Composite) mateText.getCompositeRuler().getControl();
-        for (Control c : rulerControl.getChildren()) {
-            c.setBackground(ColourUtil.getColour(globalLineBackground()));
-            c.setForeground(ColourUtil.getColour(globalForeground()));
-        }
-        rulerControl.getParent().setBackground(ColourUtil.getColour(globalLineBackground()));
+		if (mateText.getCompositeRuler() != null) {
+    	    Composite rulerControl = (Composite) mateText.getCompositeRuler().getControl();
+	        for (Control c : rulerControl.getChildren()) {
+            	c.setBackground(ColourUtil.getColour(globalLineBackground()));
+        	    c.setForeground(ColourUtil.getColour(globalForeground()));
+    	    }
+	        rulerControl.getParent().setBackground(ColourUtil.getColour(globalLineBackground()));
+		}
 		mateText.setGutterBackground(ColourUtil.getColour(globalLineBackground()));
 		mateText.setGutterForeground(ColourUtil.getColour(globalForeground()));
 	}
@@ -174,7 +176,7 @@ public class SwtColourer implements Colourer {
 			return globalSetting.background;
 		}
 	}
-	
+
 	private String globalForeground() {
 		ThemeSetting globalSetting = globalThemeSetting();
 		if (globalSetting.foreground == null) {
@@ -184,7 +186,7 @@ public class SwtColourer implements Colourer {
 			return globalSetting.foreground;
 		}
 	}
-	
+
 	private String globalLineBackground() {
 		return ColourUtil.mergeColour(globalBackground(), bareGlobalColour("lineHighlight"));
 	}
@@ -199,26 +201,26 @@ public class SwtColourer implements Colourer {
 			return "#FFFFFF";
 		}
 	}
-    
+
 	private boolean themeHasMarginColours() {
 		return (theme.globalSettings.get("marginForeground") != null &&
 				theme.globalSettings.get("marginBackground") != null);
 	}
-	
+
 	private Color globalMarginForeground() {
 		return ColourUtil.getColour(theme.globalSettings.get("marginForeground"));
 	}
-        
+
     private Color globalMarginBackground() {
         return ColourUtil.getColour(theme.globalSettings.get("marginBackground"));
     }
-	
+
 	private boolean isColorDefined(String colour) {
 		return colour != null && !(colour.length() == 0);
 	}
 
 	public class StyleRangeComparator implements Comparator {
-		
+
 		public int compare(Object o1, Object o2) {
 			StyleRange s1 = (StyleRange) o1;
 			StyleRange s2 = (StyleRange) o2;
@@ -243,12 +245,12 @@ public class SwtColourer implements Colourer {
 				}
 			}
 		}
-		
+
 		public boolean equals(Object obj) {
 			return false;
 		}
 	}
-	
+
 	private void colourLine(LineStyleEvent event) {
 		if (theme == null)
 			return;
@@ -256,19 +258,19 @@ public class SwtColourer implements Colourer {
 			return;
 		int eventLine = mateText.getControl().getLineAtOffset(event.lineOffset);
 		// System.out.printf("c%d, ", eventLine);
-		
+
 		// ArrayList<Scope> scopes = mateText.parser.root.scopesOnLine(eventLine);
 		int startLineOffset = event.lineOffset;
 		int endLineOffset;
-		
+
 		if (eventLine >= mateText.getControl().getLineCount() - 1)
 			endLineOffset = mateText.getControl().getCharCount();
 		else
 			endLineOffset = mateText.getControl().getOffsetAtLine(eventLine + 1);
-		
+
 		ArrayList<Scope> scopes = mateText.parser.root.scopesBetween(startLineOffset, endLineOffset);
 		//System.out.printf("[Color] colouring %d (%d-%d) n%d\n", eventLine, startLineOffset, endLineOffset, scopes.size());
-		
+
 		// System.out.printf("[Color] got to colour %d scopes\n", scopes.size());
 		ArrayList<StyleRange> styleRanges = new ArrayList<StyleRange>();
 		for (Scope scope : scopes) {
@@ -287,7 +289,7 @@ public class SwtColourer implements Colourer {
 		}
 		int tabWidth = mateText.getControl().getTabs();
 		addMarginColumnStyleRange(styleRanges, event, tabWidth);
-		
+
 		event.styles = (StyleRange[]) styleRanges.toArray(new StyleRange[0]);
 	}
 
@@ -307,7 +309,7 @@ public class SwtColourer implements Colourer {
 		if (scope.parent != null)
 			excludeSetting = scope.parent.themeSetting;
 		setting = theme.settingsForScope(scope, inner, null);
-		
+
 		int startLineOffset = event.lineOffset;
 		int endLineOffset   = startLineOffset + event.lineText.length();
 
@@ -328,29 +330,29 @@ public class SwtColourer implements Colourer {
 			//System.out.printf("[Color] style range (%d, %d) %s\n", styleRange.start, styleRange.length, styleRange.toString());
 		}
 	}
-	
+
 	private void addMarginColumnStyleRange(ArrayList<StyleRange> styleRanges, LineStyleEvent event, int tabWidth) {
 		int marginColumn = mateText.getMarginColumn();
-		
+
 		if (marginColumn == -1 || !themeHasMarginColours())
 			return;
-		
+
 		int startLineOffset = event.lineOffset;
 		int endLineOffset   = startLineOffset + event.lineText.length();
 		int maxColumn       = MateText.columnOfLineOffset(event.lineText, endLineOffset - startLineOffset, tabWidth);
-		
+
 		if (maxColumn <= marginColumn)
 			return;
-		
+
 		StyleRange styleRange = new StyleRange();
-		
+
 		int offsetOfColumn = MateText.lineOffsetOfColumn(event.lineText, marginColumn, tabWidth);
 		styleRange.start = startLineOffset + offsetOfColumn;
 		styleRange.length = endLineOffset - styleRange.start;
-		
+
 		styleRange.background = globalMarginBackground();
 		styleRange.foreground = globalMarginForeground();
-		
+
 		addStyleRangeWithoutOverlaps(styleRanges, styleRange);
 	}
 
@@ -359,30 +361,30 @@ public class SwtColourer implements Colourer {
 			styleRanges.add(styleRange);
 			return;
 		}
-		
+
 		// there is always an overlapping StyleRange because the document root scope is always in here
 		int indexOfParent = indexOfOverlappingStyleRange(styleRanges, styleRange);
 		if (indexOfParent == -1) {
 			styleRanges.add(styleRange);
 			return;
 		}
-		
+
 		StyleRange parentStyleRange = styleRanges.get(indexOfParent);
-		
+
 		int parentStart = parentStyleRange.start;
 		int parentEnd   = parentStyleRange.start + parentStyleRange.length;
 		int childStart  = styleRange.start;
 		int childEnd    = styleRange.start + styleRange.length;
-		
+
 		//System.out.printf("parent %d-%d, child: %d-%d\n", parentStart, parentEnd, childStart, childEnd);
-		
+
 		// *-----*
 		// *-----*
 		if (parentStart == childStart && parentEnd == childEnd) {
 			styleRangeCopyValues(parentStyleRange, styleRange);
 			return;
 		}
-		
+
 		// *------*
 		// *--*
 		if (childStart == parentStart) {
@@ -391,7 +393,7 @@ public class SwtColourer implements Colourer {
 			styleRanges.add(indexOfParent, styleRange);
 			return;
 		}
-		
+
 		// *------*
 		//    *---*
 		if (childEnd == parentEnd) {
@@ -399,7 +401,7 @@ public class SwtColourer implements Colourer {
 			styleRanges.add(indexOfParent + 1, styleRange);
 			return;
 		}
-		
+
 		// *----------*
 		//    *---*
 		parentStyleRange.length = childStart - parentStart;
@@ -410,18 +412,18 @@ public class SwtColourer implements Colourer {
 		styleRangeCopyValues(newStyleRange, parentStyleRange);
 		styleRanges.add(indexOfParent + 2, newStyleRange);
 	}
-	
+
 	private void styleRangeCopyValues(StyleRange target, StyleRange source) {
 		target.fontStyle = source.fontStyle;
 		target.foreground = source.foreground;
 		target.background = source.background;
 		target.underline = source.underline;
 	}
-	
+
 	private int indexOfOverlappingStyleRange(ArrayList<StyleRange> styleRanges, StyleRange styleRange) {
 		int i = 0;
 		for (StyleRange possibleParent : styleRanges) {
-			if (possibleParent.start < styleRange.start + styleRange.length && 
+			if (possibleParent.start < styleRange.start + styleRange.length &&
 				possibleParent.start + possibleParent.length > styleRange.start)
 				return i;
 			i++;

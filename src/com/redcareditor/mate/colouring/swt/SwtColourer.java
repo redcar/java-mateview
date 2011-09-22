@@ -7,6 +7,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.LineStyleEvent;
+import org.eclipse.swt.custom.LineBackgroundEvent;
+import org.eclipse.swt.custom.LineBackgroundListener;
 import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -21,6 +23,8 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Caret;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
 import com.redcareditor.mate.DoublePattern;
@@ -50,70 +54,45 @@ public class SwtColourer implements Colourer {
 				colourLine(event);
 			}
 		});
+		this.control.addLineBackgroundListener(new LineBackgroundListener() {
+			public void lineGetBackground(LineBackgroundEvent event) {
+                int eventLine = control.getLineAtOffset(event.lineOffset);
+                int caretLine = control.getLineAtOffset(control.getCaretOffset());
+				if (eventLine == caretLine) {
+                    event.lineBackground = ColourUtil.getColour(globalLineBackground());
+                    highlightedLine = eventLine;
+                }
+			}
+		});
 
-		addCaretMovedListeners();
-	}
-	
-	private boolean inModification = false;
-	private int lineToUpdate = -1;
-	
-    // This little dance with these three listeners and two attributes is necessary because
-    // the caretMoved event is fired before the text is modified in the buffer, so
-    // control.getLineCount() is not uptodate when it is called in updateHighlightedLine.
-	private void addCaretMovedListeners() {
 		control.addCaretListener(new CaretListener() {
 			public void caretMoved(CaretEvent e) {
-				lineToUpdate = control.getLineAtOffset(e.caretOffset);
-				if (!inModification) {
-					updateHighlightedLine(lineToUpdate);
-					lineToUpdate = -1;
-				}
-			}
-		});
-		
-		control.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				if (inModification && lineToUpdate != -1) {
-					updateHighlightedLine(lineToUpdate);
-				}
-				inModification = false;
-				lineToUpdate = -1;
-			}
-		});
-		
-		control.addVerifyListener(new VerifyListener() {
-			public void verifyText(VerifyEvent e) {
-				inModification = true;
+				int line = control.getLineAtOffset(e.caretOffset);
+                if (Math.abs(highlightedLine - line) > 1) {
+                    redrawLines(highlightedLine);
+                }
+                redrawLines(line);
 			}
 		});
 	}
 
-	private void updateHighlightedLine(int line) {
-		if (caretLineHasChanged(line)) {
-			try {
-				int maxLineIx = control.getLineCount() - 1;
-				if (line <= maxLineIx)
-					control.setLineBackground(line, 1, ColourUtil.getColour(globalLineBackground()));
-				if (highlightedLine <= maxLineIx)
-					control.setLineBackground(highlightedLine, 1, ColourUtil.getColour(globalBackground()));
-				highlightedLine = line;
-			}
-			catch(java.lang.ArrayIndexOutOfBoundsException e) {
-				
-			}
-		}
-	}
-
-	private boolean caretLineHasChanged(int line) {
-		return line != highlightedLine;
-	}
+    private void redrawLines(int line) {
+        int startOffset  = control.getOffsetAtLine(line - 1 > 0 ? line - 1 : 0);
+        int endingOffset = startOffset + 1;
+        if (line + 2 < control.getLineCount()) {
+            endingOffset = control.getOffsetAtLine(line + 2);
+        } else {
+            endingOffset = control.getText().length() - 1;
+        }
+        control.redrawRange(startOffset, endingOffset - startOffset, false);
+    }
 
 	public void setTheme(Theme theme) {
 		this.theme = theme;
 		theme.initForUse();
 		setGlobalColours();
 	}
-	
+
 	public void setGlobalColours() {
 		if (theme != null) {
 			setMateTextColours();

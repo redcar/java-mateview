@@ -54,7 +54,6 @@ namespace :build do
     require 'swt/jar_loader'
     swt_jar_dir = File.dirname(Swt.jar_path)
     
-    
     mkdir_p File.expand_path("../lib/swt_jars", __FILE__)
     %w(linux32 linux64 osx32 osx64 win32 win64).each do |platform|
       dir = File.expand_path("../lib/swt_jars/#{platform}", __FILE__)
@@ -66,7 +65,9 @@ namespace :build do
   
     mkdir_p File.expand_path("../lib/jface_jars", __FILE__)
     
-    Dir[swt_jar_dir + "/jface/org.ecl*.jar"].each do |from, to|
+    p swt_jar_dir
+    p Dir[swt_jar_dir + "/../jface/org.ecl*.jar"]
+    Dir[swt_jar_dir + "/../jface/org.ecl*.jar"].each do |from, to|
       to = File.expand_path("../lib/jface_jars/#{File.basename(from)}", __FILE__)
       cp from, to
     end
@@ -86,9 +87,9 @@ namespace :build do
     end
   end
   
-  desc "Build the release *.jar"
-  task :release => [:get_jruby] do
-    puts "Building release *.jar"
-    
-  end
+  # desc "Build the release *.jar"
+  # task :release => [:get_jruby] do
+  #   puts "Building release *.jar"
+  #   
+  # end
 end

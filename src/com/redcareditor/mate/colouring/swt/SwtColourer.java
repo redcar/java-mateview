@@ -68,6 +68,7 @@ public class SwtColourer implements Colourer {
 		control.addCaretListener(new CaretListener() {
 			public void caretMoved(CaretEvent e) {
 				int line = control.getLineAtOffset(e.caretOffset);
+				if (line == highlightedLine) return;
                 if (Math.abs(highlightedLine - line) > 1) {
                     redrawLines(highlightedLine);
                 }
@@ -82,7 +83,7 @@ public class SwtColourer implements Colourer {
         if (line + 2 < control.getLineCount()) {
             endingOffset = control.getOffsetAtLine(line + 2);
         } else {
-            endingOffset = control.getText().length() - 1;
+            endingOffset = control.getText().length();
         }
         control.redrawRange(startOffset, endingOffset - startOffset, false);
     }

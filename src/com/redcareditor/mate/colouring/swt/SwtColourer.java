@@ -83,7 +83,7 @@ public class SwtColourer implements Colourer {
         if (line + 2 < control.getLineCount()) {
             endingOffset = control.getOffsetAtLine(line + 2);
         } else {
-            endingOffset = control.getText().length();
+            endingOffset = control.getText().length() - 1;
         }
         control.redrawRange(startOffset, endingOffset - startOffset, false);
     }
